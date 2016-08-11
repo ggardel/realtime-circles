@@ -12,8 +12,15 @@ socket.on('add-circle', function (data) {
     circles.innerHTML = ' ';
   });
 
+  // listen for when the player list has changed
+ socket.on('update-player-list', function (data) {
+     var playerList = '<li>' + data.join('</li><li>') + '</li>';
+     players.innerHTML = playerList;
+ });
 
   var circles = document.getElementById('circles');
+  var players = document.getElementById('players');
+
   var initials = '';
 
   circles.addEventListener('click', function(evt) {
@@ -33,6 +40,9 @@ socket.on('add-circle', function (data) {
   do {
     initials = getInitials();
   } while (initials.length < 2 || initials.length > 3);
+  socket.emit('register-player', {initials: initials});
+
+
 
   function getInitials() {
     var input = prompt("Please enter your initials");
