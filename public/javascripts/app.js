@@ -1,14 +1,33 @@
 document.addEventListener("DOMContentLoaded", function() {
 
+  // get our connection to the socket.io server
+      var socket = io();
+      // listen to the server for the `add-circle` event
+      // listen to the server for the `add-circle` event
+socket.on('add-circle', function (data) {
+    // console.log(data);
+    addCircle(data);
+});
+  socket.on('clear', function () {
+    circles.innerHTML = ' ';
+  });
+
+
   var circles = document.getElementById('circles');
   var initials = '';
 
   circles.addEventListener('click', function(evt) {
-    addCircle(evt.clientX, evt.clientY, randomBetween(10,125), getRandomRGBA());
-  });
+    socket.emit('add-circle', {
+        initials: initials,
+        x: evt.clientX,
+        y: evt.clientY,
+        dia: randomBetween(10,100),
+        rgba: getRandomRGBA()
+    });
+});
 
   document.getElementsByTagName('button')[0].addEventListener('click', function() {
-    circles.innerHTML = '';
+    socket.emit('clear');
   });
 
   do {
@@ -20,19 +39,20 @@ document.addEventListener("DOMContentLoaded", function() {
     return input ? input.toUpperCase() : '';
   }
 
-  function addCircle(x, y, dia, rgba) {
+  // was -> function addCircle(x, y, dia, rgba) {
+function addCircle(data) {
     var el = document.createElement('div');
-    el.style.left = x - Math.floor(dia / 2 + 0.5) + 'px';
-    el.style.top = y - Math.floor(dia / 2 + 0.5) + 'px';
-    el.style.width = el.style.height = dia + 'px';
-    el.style.backgroundColor = rgba;
-    el.style.fontSize = Math.floor(dia / 3) + 'px';
+    el.style.left = data.x - Math.floor(data.dia / 2 + 0.5) + 'px';
+    el.style.top = data.y - Math.floor(data.dia / 2 + 0.5) + 'px';
+    el.style.width = el.style.height = data.dia + 'px';
+    el.style.backgroundColor = data.rgba;
+    el.style.fontSize = Math.floor(data.dia / 3) + 'px';
     el.style.color = 'white';
     el.style.textAlign = 'center';
-    el.style.lineHeight = dia + 'px';
-    el.innerHTML = initials;
+    el.style.lineHeight = data.dia + 'px';
+    el.innerHTML = data.initials;
     circles.appendChild(el);
-  }
+}
 
   function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
